@@ -28,6 +28,4 @@ class UserController(private val userService: UserService) {
         return ResponseEntity.ok(result)
     }
 
-
-
 }
