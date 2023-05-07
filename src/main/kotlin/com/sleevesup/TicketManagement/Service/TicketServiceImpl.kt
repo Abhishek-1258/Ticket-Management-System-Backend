@@ -5,6 +5,7 @@ import com.sleevesup.TicketManagement.Model.Ticket
 
 import com.sleevesup.TicketManagement.Repository.TicketRepository
 import com.sleevesup.TicketManagement.Repository.UserRepository
+import com.sleevesup.TicketManagement.exceptionHandler.ApiException
 import org.springframework.stereotype.Service
 
 
@@ -14,20 +15,25 @@ class TicketServiceImpl(
     private val userRepository: UserRepository):TicketService {
 
     override fun createTicket(createticket: TicketRequestDto): String {
-        val assignedUser = userRepository.findById(createticket.assignTo).get()
-        val reporterUser = userRepository.findById(createticket.reporter).get()
-        return try {
-            val ticket = Ticket(
-                title = createticket.title,
-                description = createticket.description,
-                assignTo = assignedUser,
-                reporter = reporterUser,
-                status = createticket.status
-            )
-            val savedTicket = ticketRepository.save(ticket)
-            "${ticket.title} has been added"
-        } catch (ex:Exception){
-            "ticket cannot  be created"
+
+        val assignedUser = userRepository.findById(createticket.assignTo)
+        val reporterUser = userRepository.findById(createticket.reporter)
+        if(assignedUser.isPresent && reporterUser.isPresent) {
+            return try {
+                val ticket = Ticket(
+                    title = createticket.title,
+                    description = createticket.description,
+                    assignTo = assignedUser.get(),
+                    reporter = reporterUser.get(),
+                    status = createticket.status
+                )
+                val savedTicket = ticketRepository.save(ticket)
+                "${ticket.title} has been added"
+            } catch (ex: Exception) {
+                "ticket cannot  be created"
+            }
+        } else {
+            throw ApiException("Assigned id or reporter id not present")
         }
     }
 
@@ -77,12 +83,8 @@ class TicketServiceImpl(
             reporter = reporterUser,
             status = details.status
         )
-        if(ticket != null){
-            ticket = ticketRepository.save(ticket)
-            return "${ticket.title} status has been updated"}
-        else{
-            return "Enter valid details"
-        }
+        ticket = ticketRepository.save(ticket)
+        return "${ticket.title} status has been updated"
     }
 
 }

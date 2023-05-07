@@ -1,9 +1,10 @@
 package com.sleevesup.TicketManagement.Controller
-
 import com.sleevesup.TicketManagement.DTO.UserLoginDto
 import com.sleevesup.TicketManagement.Service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+
+
 
 @CrossOrigin
 @RestController
@@ -27,5 +28,6 @@ class UserController(private val userService: UserService) {
         val result = userService.getUsers()
         return ResponseEntity.ok(result)
     }
+    
 
 }
